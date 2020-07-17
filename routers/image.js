@@ -12,4 +12,19 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+router.post("/", async (req, res, next) => {
+  try {
+    console.log(req.body);
+    const { title, url } = req.body;
+    if ((!title, !url)) {
+      return res.status(400).send("Bad request missing title or url");
+    } else {
+      const newImage = await Image.create({ title, url });
+      res.send(newImage);
+    }
+  } catch (e) {
+    next(e);
+  }
+});
+
 module.exports = router;

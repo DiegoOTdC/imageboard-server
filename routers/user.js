@@ -1,14 +1,16 @@
 const { Router } = require("express");
 const User = require("../models").user;
 const bcrypt = require("bcrypt");
-const user = require("../models/user");
 
 const router = new Router();
 
 router.get("/", async (req, res, next) => {
   try {
-    const users = await User.findAll();
-    res.send(users);
+    const limit = Math.min(req.query.limit || 25, 500);
+    const offset = req.query.offset || 0;
+    const users = await User.findAndCountAll({ limit, offset }).then((result) =>
+      res.send({ users: result.rows, total: result.count })
+    );
   } catch (e) {
     next(e);
   }
@@ -29,9 +31,7 @@ router.post("/", async (req, res, next) => {
       console.log("these are the newUsers, dataValues", newUser.dataValues);
 
       delete newUser.dataValues["password"];
-      delete newUser.dataValues["id"];
-      delete newUser.dataValues["createdAt"];
-      delete newUser.dataValues["updatedAt"];
+
       res.send(newUser);
     }
   } catch (e) {
